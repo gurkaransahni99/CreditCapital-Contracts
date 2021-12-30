@@ -33,7 +33,16 @@
                     },
                 },
               },
-            },
+			  "contracts/version1/USDC.sol": {
+				version: "0.8.0",
+				settings: {
+					optimizer: {
+						enabled: true,
+						runs: 1,
+					},
+				},
+			  },
+			},
       },
       spdxLicenseIdentifier: {
           overwrite: true,
@@ -57,6 +66,11 @@
                   accountsBalance: "100000000000000000000000",
                   count: 20,
               },
+              forking: {
+                url: "https://bsc-dataseed.binance.org/",
+                timeout: 1000000000000
+              }
+          
           },
           bscTestnet: {
               url: `https://data-seed-prebsc-1-s1.binance.org:8545/`,

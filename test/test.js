@@ -5,11 +5,21 @@ const truffleAssert = require('truffle-assertions');
 const CONFIG = require("../credentials");
 const { web3 } = require('hardhat');
 
-const tokenABI = (JSON.parse(fs.readFileSync('./artifacts/contracts/erc20.sol/Token.json', 'utf8'))).abi;
+// const tokenABI = (JSON.parse(fs.readFileSync('./artifacts/contracts/erc20.sol/Token.json', 'utf8'))).abi;
+let routerABI = fs.readFileSync('./abi/router.abi').toString();
+routerABI = JSON.parse(routerABI);
+let factoryABI = fs.readFileSync('./abi/factory.abi').toString();
+factoryABI = JSON.parse(factoryABI);
 
 contract("Wrap Unwrap Test Cases", () => {
-    let token;    
+    let liquidity;   
+	let capl;
+	let usdc; 
     let accounts;
+    let router = null;
+    let factory = null;
+    let routerAdd = '0x05fF2B0DB69458A0750badebc4f9e13aDd608C7F';
+    let factoryAdd = "0xbcfccbde45ce874adcb698cc183debcf17952812";
 
     // const provider = new Web3.providers.HttpProvider("http://127.0.0.1:8545");
     const provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545");
@@ -19,15 +29,50 @@ contract("Wrap Unwrap Test Cases", () => {
     before(async () => {
         accounts = await web3.eth.getAccounts()
 
-        const TOKEN = artifacts.require("Token");
+        const LIQUIDITY = artifacts.require("contracts/version2/AddLiquidity2.sol:addLiquidity");
+        const CAPL = artifacts.require("CAPL");
+        const USDC = artifacts.require("USDC");
 
-        token = await TOKEN.new()
-        TOKEN.setAsDeployed(token)
-        token = await TOKEN.deployed()
+		capl = await CAPL.new()
+        CAPL.setAsDeployed(capl)
+        capl = await CAPL.deployed()
+
+		usdc = await USDC.new()
+        USDC.setAsDeployed(usdc)
+        usdc = await USDC.deployed()
+
+		console.log({
+			capl: capl.address,
+			usdc: usdc.address,
+		})
+
+		router = await ethers.getContractAt(routerABI, routerAdd);
+        factory = await ethers.getContractAt(factoryABI, factoryAdd);
+
+        await factory.createPair(capl.address, usdc.address);
+
+		let pairAddress = await factory.getPair(capl.address, usdc.address);
+
+
+		liquidity = await LIQUIDITY.new(capl.address, usdc.address, pairAddress)
+        LIQUIDITY.setAsDeployed(liquidity)
+        liquidity = await LIQUIDITY.deployed()
+
+        // router = truffleContract({ abi: routerABI });
+        // router.setProvider(provider);
+        // router = await router.at(routerAdd);
+  
+        // factory = truffleContract({ abi: factoryABI });
+        // factory.setProvider(provider);
+        // factory = await factory.at(factoryADD);
 
 
         console.log({
-            token: token.address,
+			liquidity: liquidity.address,
+			usdc: usdc.address,
+			capl: capl.address,
+            router: router.address,
+            factory: factory.address,
         })
 
     })
@@ -73,71 +118,8 @@ contract("Wrap Unwrap Test Cases", () => {
         })
     })
 
-    const mintCost = async (token, address, number) => {
-        const erc20 = new ethers.Contract(token.address, tokenABI, provider);
-        const estimateGas = await erc20.estimateGas.mint(address, number);
-        return estimateGas;
-    }
-
-    const burnCost = async (token, address, number) => {
-        const erc20 = new ethers.Contract(token.address, tokenABI, provider);
-        const estimateGas = await erc20.estimateGas.burn(address, number);
-        return estimateGas;
-    }
-
     it ("should mint tokens, when called by admin", async () => {
-        const admin = accounts[0]
-        const user = accounts[1]
-        const amount = 100
 
-        const balanceBef = await token.balanceOf(user)
-
-        await token.mint(user, amount, {from: admin})
-        await truffleAssert.reverts(token.mint(user, amount, {from: user}))
-
-        const balanceAft = await token.balanceOf(user)
-        
-        assert.equal(balanceBef.toNumber(), 0, "Balance before is not equal to 0")
-        assert.equal(balanceAft.toNumber(), amount, "Balance after is not equal to amount")
-    })
-
-    it ("should burn tokens, when called by admin", async () => {
-        const admin = accounts[0]
-        const user = accounts[1]
-        const amount = 100
-
-        const balanceBef = await token.balanceOf(user)
-
-        await token.burn(user, amount, {from: admin})
-        await truffleAssert.reverts(token.burn(user, amount, {from: user}))
-
-        const balanceAft = await token.balanceOf(user)
-        
-        assert.equal(balanceAft.toNumber(), 0, "Balance after is not equal to 0")
-        assert.equal(balanceBef.toNumber() - balanceAft.toNumber(), amount, "Burn amount not correct")
-    })
-
-    it ("should estimate gas", async () => {
-        const admin = accounts[0]
-
-        await mintCost(token, accounts[0], 100)
-        await token.mint(accounts[0], 100, {from: admin})
-
-        await burnCost(token, accounts[0], 100)
-        await token.burn(accounts[0], 100, {from: admin})
-
-        await mintCost(token, accounts[1], 100000000000)
-        await token.mint(accounts[1], 100000000000, {from: admin})
-
-        await mintCost(token, accounts[2], 1000)
-        await token.mint(accounts[2], 1000, {from: admin})
-
-        await burnCost(token, accounts[1], 50000000000)
-        await token.burn(accounts[1], 50000000000, {from: admin})
-
-        await burnCost(token, accounts[2], 500)
-        await token.burn(accounts[2], 500, {from: admin})
-        
     })
 
 })

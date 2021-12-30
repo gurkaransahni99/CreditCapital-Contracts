@@ -515,9 +515,9 @@ contract CAPL is ERC20, Ownable {
 
     uint256 public constant TotalSupplyOfCapl = 100000000000000;
     uint256 public currentSupply;
-    constructor(uint256 tokenAmount) ERC20("CAPL Coin", "CAPL") {
-        	_mint(msg.sender, tokenAmount);
-            currentSupply = tokenAmount;
+    constructor() ERC20("CAPL Coin", "CAPL") {
+        	_mint(msg.sender, TotalSupplyOfCapl);
+            currentSupply = TotalSupplyOfCapl;
     }
 
     function mint(address _to, uint256 _amount) external onlyOwner {
