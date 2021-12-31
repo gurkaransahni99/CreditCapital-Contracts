@@ -513,7 +513,7 @@ contract Ownable is Context {
 }
 contract USDC is ERC20, Ownable {
 
-    uint256 public constant TotalSupplyOfUsdc = 100000000000000;
+    uint256 public constant TotalSupplyOfUsdc = 10000000000000000000000000;
     uint256 public currentSupply;
     constructor() ERC20("USDC Coin", "USDC") {
         	_mint(msg.sender, TotalSupplyOfUsdc);

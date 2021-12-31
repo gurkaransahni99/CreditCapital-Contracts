@@ -826,13 +826,14 @@ contract addLiquidity is Ownable {
   
      address public  caplUsdcPair;
     
-constructor(address _capl, address _usdc, address _pair) public {
+constructor(address _capl, address _usdc, address _pair, address _router) public {
     capl = (_capl);
     usdc = (_usdc);
   (caplUsdcPair) = (_pair);
 
         // uniswapV2Router = IUniswapV2Router02(0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff);
-        uniswapV2Router = IUniswapV2Router02(0x05fF2B0DB69458A0750badebc4f9e13aDd608C7F);
+        // uniswapV2Router = IUniswapV2Router02(0x05fF2B0DB69458A0750badebc4f9e13aDd608C7F);
+        uniswapV2Router = IUniswapV2Router02(_router);
        
             
            

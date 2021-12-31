@@ -63,15 +63,22 @@
               allowUnlimitedContractSize: true,
               timeout: 1000000000000,
               accounts: {
-                  accountsBalance: "100000000000000000000000",
+                  accountsBalance: "10000000000000000000000000000000",
                   count: 20,
               },
               forking: {
-                url: "https://bsc-dataseed.binance.org/",
+                // url: "https://bsc-dataseed.binance.org/",
+                url: "https://mainnet.infura.io/v3/7431868d5d1d49e99286e1f59569a0e0",
                 timeout: 1000000000000
               }
-          
           },
+        //   localhost: {
+        //     url: "http://127.0.0.1:8545",
+        //     forking: {
+        //         url: "https://bsc-dataseed.binance.org/",
+        //         timeout: 1000000000000
+        //     }
+        //   },
           bscTestnet: {
               url: `https://data-seed-prebsc-1-s1.binance.org:8545/`,
               accounts: [CONFIG.wallet.PKEY],
